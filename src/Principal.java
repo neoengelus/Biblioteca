@@ -1,4 +1,4 @@
-import java.util.Scanner;
+//import java.util.Scanner;
 
 public class Principal {
 
@@ -8,15 +8,17 @@ public class Principal {
 		Socio soc = new Socio();
 		Libro lib = new Libro();
 		
-		cargarDatosSocio(soc);
-		cargarDatosLibro(lib);
 		conn.conectar();
+		CargaDatos.dataSocio(soc);
+		CargaDatos.dataLibro(lib);
+		/*cargarDatosSocio(soc);
+		cargarDatosLibro(lib);*/
 		soc.mostrarDatos();
 		lib.mostrarDatos();
 
 	}
 	
-	public static void cargarDatosSocio(Socio per) {
+	/*public static void cargarDatosSocio(Socio per) {
 		Scanner teclado = new Scanner(System.in);
 		
 		System.out.println("Ingrese el nombre");
@@ -50,6 +52,6 @@ public class Principal {
 		lib.setAnio(teclado.nextInt());
 		System.out.println("Ingrese la cantidad de páginas del libro");
 		lib.setPag(teclado.nextInt());		
-	}
+	}*/
 
 }
