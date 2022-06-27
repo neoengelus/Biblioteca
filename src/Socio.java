@@ -59,10 +59,16 @@ public class Socio extends Persona{
 		return true;
 	}
 	
-	public boolean controSocio(int idSocio) {
+	public boolean controlSocio(int idSocio) {
 		//devuelve true si el usuario es socio caso contrario false
 		//consulta en SQL con el idSocio para traer si es socio o no de la biblioteca
 		//Consultas.Membresia(idSocio)
 		return true;
+	}
+	
+	public void historialCuotas(int idSocio) {
+		//devuelve el historial de las cuotas del socio
+		//consulta SQL
+		//Consultas.historialCuotas();
 	}
 }

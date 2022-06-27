@@ -79,4 +79,34 @@ public class Libro {
 		System.out.println("Año de publicación: " +this.anioPub);
 		System.out.println("Cantidad de páginas: " +this.cantPag);
 	}
+	
+	public void listarLibros() {
+		//muestra una lista de todos los libros de la biblioteca
+		//realiza una consulta en SQL y devuelve la totalidad del catálogo de libros independientemente de su estado 
+		//SELECT * FROM Libros
+		//Consultas.listarLibros();
+	}
+	
+	public void listarLibros(int idLibro) {
+		//muestra una lista específica de los libros indicados 
+		//consulta SQL que devuelve los libros indicados mediante su id
+		//Consultas.listarlibros();
+	}
+	
+	public void listarLibros(String nombre) {
+		//muestra la lista de libros por autor
+		//consulta SQL que devuelve los libros del autor indicado
+		//Consultas.listarLibros();
+	}
+	
+	public boolean estadoLibro(int nroEjemplar, int idLibro) {
+		//devuelve true si el libro se encuentra prestado caso contrario false
+		//teniendo en cuenta que el nro de ejemplar es un entero y se va incrementando y 
+		//puede haber más de un ejemplar del mismo tipo, Por ej Algebra de Boole ejemplar 1, Algebra de Boole ejemplar 2 
+		//por eso mismo se usa el idLibro para determinar específicamente que libro es ya que este es único de cada libro
+		//sin importar si hay más de un ejemplar del mismo
+		//Consulta SQL con los valores mencionados anteriormente
+		//Consultas.estadoLibro();
+		return true;
+	}
 }
