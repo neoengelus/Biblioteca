@@ -50,4 +50,19 @@ public class Socio extends Persona{
 			}
 		else System.out.println("No es socio");
 	}
+	
+
+	public boolean controlCuenta(int idSocio) {
+		//devuelve true si el usuario está al día caso contrario false
+		//consulta en SQL cin el idSocio para traer el estado de cuenta
+		//Consultas.Cuenta(idSocio)
+		return true;
+	}
+	
+	public boolean controSocio(int idSocio) {
+		//devuelve true si el usuario es socio caso contrario false
+		//consulta en SQL con el idSocio para traer si es socio o no de la biblioteca
+		//Consultas.Membresia(idSocio)
+		return true;
+	}
 }

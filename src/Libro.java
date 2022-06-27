@@ -50,23 +50,23 @@ public class Libro {
 	}
 	
 	public String getNombre() {
-		return nombre;
+		return this.nombre;
 	}
 	
 	public String getAutor() {
-		return autor;
+		return this.autor;
 	}
 	
 	public String getDescripcion() {
-		return descripcion;
+		return this.descripcion;
 	}
 	
 	public int getAnio() {
-		return anioPub;
+		return this.anioPub;
 	}
 	
 	public int getPag() {
-		return cantPag;
+		return this.cantPag;
 	}
 	
 	// metodos propios
