@@ -1,3 +1,4 @@
+package clases;
 import java.sql.Connection;
 import java.sql.DriverManager;
 
@@ -13,10 +14,9 @@ public class Conexion {
 		try {
 			Class.forName(DRIVER);
 			con = DriverManager.getConnection(BD_URL,USER,PASS); 
-			System.out.println("Conexion exitosa");
-			con.close();
+			//System.out.println("Conexion exitosa");
 		}catch(Exception e) {
-			System.out.println("Problemas al intentar conectar a la base de datos");
+			System.out.println("Problemas al intentar conectar a la base de datos" +e);
 		}
 		return con;
 	}
