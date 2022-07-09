@@ -340,7 +340,7 @@ public class Consulta {
 		}
 	}
 	
-	public void controlDescargas(int idUsuario) {
+	public void controlDescargas(int idUsuario, int idLibro) {
 		/*debe controlar las cantidades de descargas antes de registrarlas 
 	 	No se permite la descarga de un libro si:
 			ha descargado 2 libros en un mismo dia
@@ -348,7 +348,7 @@ public class Consulta {
 			ha descargado más de 2 vece el mismo libro en 6 meses
 		Si se cumplen las condiciones llama a registrarDescarga, caso contrario muestra mensaje de error 
 	 */
-	}
+		}
 	
 	public boolean controlDescargasDiarias(int idUsuario) {
 		//devuelve true en caso de que se hallan superado las 2 descargas diarias permitidas caso contrario devuelve false
@@ -418,15 +418,19 @@ public class Consulta {
 		while (rs.next()) {
 			listaFecha.add(rs.getDate(1));
 		}
-		int mes1 = listaFecha.get(0).getMonth();
-		int mes2 = listaFecha.get(1).getMonth();
-		System.out.println(mes1 - mes2);
-		if (mes1 - mes2 == 0) {
-			System.out.println("Se descargó dos veces el mismo libro en 6 meses");
-			ctrl = true;
+		if (listaFecha.size()>1) { //controlamos que la consulta de mas de 1 resultado caso contrario da error al hacer las diferencias
+			//Se obtiene los años y los meses de las fechas solicitadas para determinar cuanto tiempo pasó entre fecha y fecha
+			int difAnio = listaFecha.get(0).getYear() - listaFecha.get(1).getYear(); //calculamos la diferencia en años entre las dos fechas
+			int difDia = difAnio*12 +  listaFecha.get(0).getMonth() -  listaFecha.get(0).getMonth(); //necesitamos calcular la cantidad de meses entre 
+			// esos años, para eso multiplicamos 12 por la diferencia de años entre las dos fechas y a esto le sumamos el número del mes de la fecha final y 
+			//por último le restamos el número del mes de inicio y obtenemos la diferencia en meses entre las fechas
+			if (difDia == 0) {
+				System.out.println("Se descargó dos veces el mismo libro en 6 meses");
+				ctrl = true;
+			}
 		}
-		}catch (Exception e) {
-			System.out.println("Ocurrio un error inesperado"+ " "+e);
+			}catch (Exception e) {
+				System.out.println("Ocurrio un error inesperado"+ " "+e);
 		}
 		return ctrl;
 	}
@@ -463,11 +467,11 @@ public class Consulta {
 			stm = usarConexion.createStatement();
 			rs = stm.executeQuery(consulta);
 			
-			System.out.printf("|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s\n","ID Cuota", "Estado", "Monto", "Fecha","Usuario","Nombre Usuario");
+			System.out.printf("|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s\n","ID Cuota", "Estado", "Monto", "Dia","Mes","Usuario","Nombre Usuario");
 			if (rs.next()) {
-				System.out.printf("|%-20s|%-20d|%-20d|%-20s",rs.getString(1), rs.getInt(2),rs.getInt(3),rs.getDate(5));
+				System.out.printf("|%-20s|%-20d|%-20d|%-20s|%-20s",rs.getString(1), rs.getInt(2),rs.getInt(3),rs.getInt(5),rs.getInt(6));
 				Usuario usuario = buscarUsuario(idUsuario);
-				System.out.printf("|%-20s|%-20s", usuario.getNombre() +" " + usuario.getApellido(), usuario.getNombreUsuario());
+				System.out.printf("|%-20s|%-20s\n", usuario.getNombre() +" " + usuario.getApellido(), usuario.getNombreUsuario());
 			}else {
 				System.out.println("No se econtró historial");
 			}
@@ -477,15 +481,17 @@ public class Consulta {
 	}
 	
 	public boolean determinarEstadoCuota(int idUsuario) {
-		//funcion que determina si un usuario está al día o no con las cuotas, true=al día, false=mora
+		//funcion que determina si un usuario está al día o no con las cuotas, true=al día, false=mora en base al estado 1= pago 0=debe
 		boolean estado=false;
 		try {
-			String consulta ="SELECT * FROM cuota WHERE fecha=NOW()";
+			String consulta ="SELECT estado FROM cuota WHERE id_Usuario=" +idUsuario +" AND mes = MONTH(CURDATE())";
 			usarConexion = conn.conectar();
 			stm = usarConexion.createStatement();
 			rs = stm.executeQuery(consulta);
 			if (rs.next()) {
-				estado = true;
+				if (rs.getInt(1) == 1) {
+					estado = true;
+				}
 			}
 		}catch (Exception e) {
 			System.out.println("Ocurrio un error inesperado"+ " "+e);
@@ -493,16 +499,22 @@ public class Consulta {
 		return estado;
 	}
 	
-	public void registrarCuota(int idUsuario, int monto, int estado) {
+	public void registrarCuota(int idUsuario, int monto) {
 		//registra el pago de la cuota en la BD
 		try {
-			String consulta = "INSERT INTO cuota (estado, monto, id_Usuario, fecha) VALUES (?,?,?,NOW())";
+			String consulta = "INSERT INTO cuota (estado, monto, id_Usuario, dia, mes) VALUES (?,?,?,?,?)";
 			usarConexion = conn.conectar();
 			ps = usarConexion.prepareStatement(consulta);
-			ps.setObject(1, estado);
-			ps.setObject(2, monto);
-			ps.setObject(3, idUsuario);
-			ps.executeUpdate();
+			if (!determinarEstadoCuota(idUsuario)) { //primervo vemos que no esté pagado el mes en curso
+				long mili = System.currentTimeMillis();
+				Date fecha = new Date(mili); 
+				ps.setObject(1, 1);
+				ps.setObject(2, monto);
+				ps.setObject(3, idUsuario);
+				ps.setObject(4, fecha.getDay() );
+				ps.setObject(5, fecha.getMonth());
+				ps.executeUpdate();
+			}
 			Usuario user = buscarUsuario(idUsuario);
 			System.out.println("Se registró correctamente la cuota del usuario: " + user.getNombre() + " " +user.getApellido());
 		}catch (Exception e) {

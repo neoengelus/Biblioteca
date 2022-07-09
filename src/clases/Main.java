@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class Main {
 
 	public static void main(String[] args) {
-	boolean ctrl=true;
+	/*boolean ctrl=true;
 		
 		while (ctrl) {
 		System.out.println("Sistema de gestión de biblioteca \nElija una opción:");
@@ -27,9 +27,9 @@ public class Main {
 				ctrl = false;
 				break;
 			}
-		}
-		
-		
+		}*/
+		Consulta consul = new Consulta();
+		//consul.registrarCuota(1, 200);
+		consul.historialCuotas(1);
 	}
-
 }
