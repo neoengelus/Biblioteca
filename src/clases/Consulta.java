@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.sql.Date;
 
 public class Consulta {
 	Conexion conn = new Conexion();
@@ -324,14 +325,110 @@ public class Consulta {
 		}
 	}
 	
-	public void controlDescargas() {
+	public void registrarDescarga(int idUsuario, int idLibro) {
+		//registra la descarga del libro en la BD
+		
+		try {
+			String consulta = "INSERT INTO descarga (fechaDescarga, id_Usuario, id_Libro) VALUES (NOW(),?,?)";
+			ps = usarConexion.prepareStatement(consulta);
+			ps.setObject(1,idUsuario);
+			ps.setObject(2,idLibro);
+			ps.executeUpdate();
+			System.out.println("Se registró la descarga");
+		}catch (Exception e) {
+			System.out.println("Ocurrio un error inesperado"+ " "+e);
+		}
+	}
+	
+	public void controlDescargas(int idUsuario) {
 		/*debe controlar las cantidades de descargas antes de registrarlas 
-		 	No se permite la descarga de un libro si:
-				ha descargado 2 libros en un mismo dia
-				ha descargado más de 20 libros en el mes
-				ha descargado más de 2 vece el mismo libro en 6 meses
-			Si se cumplen las condiciones llama a registrarDescarga, caso contrario muestra mensaje de error 
-		 */
+	 	No se permite la descarga de un libro si:
+			ha descargado 2 libros en un mismo dia
+			ha descargado más de 20 libros en el mes
+			ha descargado más de 2 vece el mismo libro en 6 meses
+		Si se cumplen las condiciones llama a registrarDescarga, caso contrario muestra mensaje de error 
+	 */
+	}
+	
+	public boolean controlDescargasDiarias(int idUsuario) {
+		//devuelve true en caso de que se hallan superado las 2 descargas diarias permitidas caso contrario devuelve false
+		boolean ctrl = false;
+		try {
+			String consulta="SELECT fechaDescarga FROM descarga WHERE id_Usuario=" +idUsuario + " AND fechaDescarga=CURDATE()";
+			usarConexion = conn.conectar();
+			stm = usarConexion.createStatement();
+			rs = stm.executeQuery(consulta);
+			ArrayList<Date> listaFecha = new ArrayList<Date>();
+			while (rs.next()) {
+				listaFecha.add(rs.getDate(1));
+			}
+			//vamos a controlar las dos descargas diarias 
+			int cont = 0; //contador de control
+			for (int i = 0; i < listaFecha.size(); i++) {
+				Date hoy = new Date(System.currentTimeMillis());//devuelve el tiempo a hoy en milisegundos
+				Date fecha = listaFecha.get(i);//asigana la fecha obtenida en la consulta en milisegundos
+				int cantMiliSeg = 1000*60*60*24; //cantidad de milisegundos en un día
+				long restaFechas = ((hoy.getTime() - fecha.getTime()) / cantMiliSeg);//Se restas las dos fechas y se divide el resultado entre el 
+																				//número de milisegundos que tiene un día
+				if ( restaFechas == 0) {
+					cont++;
+					}
+				}
+			if (cont >= 2) {
+				System.out.println("Alcanzado el límite de 2 descargas diarias");
+				ctrl = true;
+				}
+		}catch (Exception e) {
+			System.out.println("Ocurrio un error inesperado"+ " "+e);
+		}
+		return ctrl;
+	}
+	
+	public boolean controlDescargasMensuales(int idUsuario) {
+		//devuelve true en caso de que se halla superado el límite de 20 libros mensuales caso contrario devuelve false
+		boolean ctrl = false;
+		int cont = 0;
+		try {
+			String consulta ="SELECT * FROM descarga WHERE YEAR(fechaDescarga) = YEAR(CURDATE()) AND MONTH (fechaDescarga) = MONTH (CURDATE()) AND id_Usuario =" +idUsuario;
+			usarConexion = conn.conectar();
+			stm = usarConexion.createStatement();
+			rs = stm.executeQuery(consulta);
+			while (rs.next()) {
+				cont++;
+			}
+			if (cont >= 20) {
+				System.out.println("Se superaron las 20 descargas mensuales");
+				ctrl = true;
+			}
+		}catch (Exception e) {
+			System.out.println("Ocurrio un error inesperado"+ " "+e);
+		}
+		return ctrl;
+	}
+	
+	public boolean controlDescargasSemestrales(int idUsuario, int idLibro) {
+		//devuelve true en caso de que se halla superado el máximo de 2 descargas de un mismo libro en los últimos 6 meses
+		boolean ctrl = false;
+		try {
+		String consulta	="SELECT fechaDescarga FROM descarga WHERE id_Usuario =" +idUsuario +" AND id_Libro=" +idLibro;
+		usarConexion = conn.conectar();
+		stm = usarConexion.createStatement();
+		rs = stm.executeQuery(consulta);
+		ArrayList<Date> listaFecha = new ArrayList<Date>();
+		while (rs.next()) {
+			listaFecha.add(rs.getDate(1));
+		}
+		int mes1 = listaFecha.get(0).getMonth();
+		int mes2 = listaFecha.get(1).getMonth();
+		System.out.println(mes1 - mes2);
+		if (mes1 - mes2 == 0) {
+			System.out.println("Se descargó dos veces el mismo libro en 6 meses");
+			ctrl = true;
+		}
+		}catch (Exception e) {
+			System.out.println("Ocurrio un error inesperado"+ " "+e);
+		}
+		return ctrl;
 	}
 	
 	public void historialDescargas(int idUsuario) {
@@ -366,10 +463,11 @@ public class Consulta {
 			stm = usarConexion.createStatement();
 			rs = stm.executeQuery(consulta);
 			
-			System.out.printf("|%-20s|%-20s|%-20s|%-20s|%-20s\n","ID Cuota", "Estado", "Monto", "Usuario","Nombre Usuario");
+			System.out.printf("|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s\n","ID Cuota", "Estado", "Monto", "Fecha","Usuario","Nombre Usuario");
 			if (rs.next()) {
+				System.out.printf("|%-20s|%-20d|%-20d|%-20s",rs.getString(1), rs.getInt(2),rs.getInt(3),rs.getDate(5));
 				Usuario usuario = buscarUsuario(idUsuario);
-				System.out.printf("|%-20s|%-20s|%-20s|%-20s|%-20s\n",rs.getString(1), rs.getString(2),rs.getString(3),usuario.getNombre(), usuario.getNombreUsuario());
+				System.out.printf("|%-20s|%-20s", usuario.getNombre() +" " + usuario.getApellido(), usuario.getNombreUsuario());
 			}else {
 				System.out.println("No se econtró historial");
 			}
@@ -380,6 +478,35 @@ public class Consulta {
 	
 	public boolean determinarEstadoCuota(int idUsuario) {
 		//funcion que determina si un usuario está al día o no con las cuotas, true=al día, false=mora
-		return true;
+		boolean estado=false;
+		try {
+			String consulta ="SELECT * FROM cuota WHERE fecha=NOW()";
+			usarConexion = conn.conectar();
+			stm = usarConexion.createStatement();
+			rs = stm.executeQuery(consulta);
+			if (rs.next()) {
+				estado = true;
+			}
+		}catch (Exception e) {
+			System.out.println("Ocurrio un error inesperado"+ " "+e);
+		}
+		return estado;
+	}
+	
+	public void registrarCuota(int idUsuario, int monto, int estado) {
+		//registra el pago de la cuota en la BD
+		try {
+			String consulta = "INSERT INTO cuota (estado, monto, id_Usuario, fecha) VALUES (?,?,?,NOW())";
+			usarConexion = conn.conectar();
+			ps = usarConexion.prepareStatement(consulta);
+			ps.setObject(1, estado);
+			ps.setObject(2, monto);
+			ps.setObject(3, idUsuario);
+			ps.executeUpdate();
+			Usuario user = buscarUsuario(idUsuario);
+			System.out.println("Se registró correctamente la cuota del usuario: " + user.getNombre() + " " +user.getApellido());
+		}catch (Exception e) {
+			System.out.println("Ocurrio un error inesperado"+ " "+e);
+		}
 	}
 }
