@@ -508,18 +508,22 @@ public class Consulta {
 			usarConexion = conn.conectar();
 			stm = usarConexion.createStatement();
 			rs = stm.executeQuery(consulta);
-			System.out.printf("|%-20s|%-20s|%-20s|%-20s\n","ID Descarga", "Fecha", "Usuario", "Libro");
 			
+			//System.out.printf("|%-20s|%-20s|%-20s|%-20s\n","ID Descarga", "Fecha", "Usuario", "Libro");
+			System.out.printf("+--------------------+--------------------+--------------------+-------------------------+\n");
+			System.out.printf("|%-20s|%-20s|%-20s|%-25s|\n","ID Descarga", "Fecha", "Usuario", "Libro");
+			System.out.printf("+--------------------+--------------------+--------------------+-------------------------+\n");
 			if (rs.next()) {
 				System.out.printf("|%-20s|%-20s",rs.getString(1), rs.getString(2));
 				int id=rs.getInt(4);
 				Usuario usuario = buscarUsuario(idUsuario);
 				Libro libro = buscarLibro(id);
-				System.out.printf("|%-20s|%-20s",usuario.getNombreUsuario(), libro.getTitulo());
+				System.out.printf("|%-20s|%-25s|\n",usuario.getNombreUsuario(), libro.getTitulo());
 			}
 			else {
 				System.out.println("No se econtró historial");
 			}
+			System.out.printf("+--------------------+--------------------+--------------------+-------------------------+\n");
 		}catch (Exception e) {
 			System.out.println("Ocurrio un error inesperado"+ " "+e);
 		}
@@ -631,6 +635,22 @@ public class Consulta {
 			System.out.println("Se registró correctamente la cuota del usuario: " + user.getNombre() + " " +user.getApellido());
 		}catch (Exception e) {
 			System.out.println("Ocurrio un error inesperado"+ " "+e);
+		}
+	}
+	
+	public void bajaUsuario(int id) {
+		try {
+			String sql = "UPDATE usuario SET tipoUsuario = '4' WHERE `usuario`.`id_Usuario` ="+id;
+			usarConexion = conn.conectar();
+			ps = usarConexion.prepareStatement(sql);
+			ps.executeUpdate();
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|          Se DIO DE BAJA correctamente al Socio                   |");
+			
+		} catch (Exception e) {
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("| OCURRIO UN ERROR INESPERADO ");
+			System.out.println(e);
 		}
 	}
 }

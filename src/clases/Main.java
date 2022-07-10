@@ -3,10 +3,13 @@ import java.sql.*;
 import java.util.Scanner;
 
 public class Main {
-
+	
+	static String nombre;
+	static String password;
+	
 	public static void main(String[] args) {
 		opciones(Menu());
-	}
+		}
 
 	//Funciones 
 	public static int Menu() {
@@ -41,8 +44,10 @@ public class Main {
 			System.out.println("|                                                                  |");
 			System.out.printf("     USUARIO: ");
 			user = teclado.nextLine();
+			nombre = user;
 			System.out.printf("     CONTRASEÑA: ");
 			pass = teclado.next();
+			password = pass;
 			Login logueo = new Login();
 			if (logueo.login(user, pass) == 1) {
 				System.out.println("+------------------------------------------------------------------+");
@@ -339,8 +344,117 @@ public class Main {
 		
 	}
 	public static void accionesUser(int op) {
-		
+		Scanner teclado = new Scanner(System.in);
+		int opcion;
+		Consulta consul = new Consulta();
+		int idUsuario = consul.buscarIdUsuario(nombre);
+		switch(op) {
+		case 1:
+			consul.mostrarLibros(2);
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|        Desea realizar otra consulta...?                          |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("| (1) SI                                                           |");
+			System.out.println("| (2) NO (sale del sistema)                                        |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.print("|  Ingrese su opción:                                               ");
+			opcion = teclado.nextInt();
+			if (opcion == 1) {
+				menuUsuario(2);
+			} else
+				Menu();
+			break;
+		case 2:
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|                   Búsqueda de Libros                             |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("| (1) Buscar por nombre de libro                                   |");
+			System.out.println("| (2) Buscar por ID de libro                                       |");
+			System.out.println("| (3) Volver al menú anterior                                      |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.print("|   Ingrese su opción:                                              ");
+			opcion = teclado.nextInt();
+			if (opcion == 1) {
+				System.out.print(" |  Ingrese el nombre del libro:                                    ");
+				Scanner nombre = new Scanner(System.in);
+				String nombreLibro = teclado.nextLine();
+				Libro libroBuscado = consul.buscarLibro(nombreLibro);
+				libroBuscado.mostrarDatos();
+				} else if (opcion == 2) {
+					System.out.print("|  Ingrese el ID del libro:                                        ");
+					int idLibro = teclado.nextInt();
+					Libro libroBuscado = consul.buscarLibro(idLibro);
+					libroBuscado.mostrarDatos();
+				} else {
+					accionesUser(2);
+				}
+			break;
+		case 3:
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|                   Historial de Cuotas                            |");
+			System.out.println("+------------------------------------------------------------------+");
+			consul.historialCuotas(idUsuario);
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|        Desea realizar otra consulta...?                          |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("| (1) SI                                                           |");
+			System.out.println("| (2) NO (sale del sistema)                                        |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.print("|  Ingrese su opción:                                               ");
+			opcion = teclado.nextInt();
+			if (opcion == 1) {
+				menuUsuario(2);
+			} else
+				Menu();
+			break;
+		case 4:
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|                Historial de Descargas                            |");
+			System.out.println("+------------------------------------------------------------------+");
+			consul.historialDescargas(idUsuario);
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|        Desea realizar otra consulta...?                          |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("| (1) SI                                                           |");
+			System.out.println("| (2) NO (sale del sistema)                                        |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.print("|  Ingrese su opción:                                               ");
+			opcion = teclado.nextInt();
+			if (opcion == 1) {
+				menuUsuario(2);
+			} else
+				Menu();
+			break;
+		case 5:
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|                Baja de Usuario                                   |");
+			System.out.println("+------------------------------------------------------------------+");
+			consul.bajaUsuario(idUsuario);
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|        Desea realizar otra consulta...?                          |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("| (1) SI                                                           |");
+			System.out.println("| (2) NO (sale del sistema)                                        |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.print("|  Ingrese su opción:                                               ");
+			opcion = teclado.nextInt();
+			if (opcion == 1) {
+				menuUsuario(2);
+			} else
+				Menu();
+			break;
+		default:
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|          REGRESANDO AL MENU ANTERIOR...                          |");
+			System.out.println("+------------------------------------------------------------------+");
+			try { Thread.sleep(1500); 
+			  } catch(InterruptedException ex) 
+			  { Thread.currentThread().interrupt(); }
+			menuUsuario(2);
+			break;
+		}
 	}
+
 	public static void crudUsuarios(int op, int tipo) {
 		Scanner teclado = new Scanner(System.in);
 		Usuario user = new Usuario();
