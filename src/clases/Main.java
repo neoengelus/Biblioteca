@@ -385,12 +385,12 @@ public class Main {
 			System.out.println("| (2) Buscar por ID de libro                                       |");
 			System.out.println("| (3) Volver al menú anterior                                      |");
 			System.out.println("+------------------------------------------------------------------+");
-			System.out.print("|   Ingrese su opción:                                              ");
+			System.out.print("|   Ingrese su opción: ");
 			opcion = teclado.nextInt();
 			if (opcion == 1) {
-				System.out.print(" |  Ingrese el nombre del libro:                                    ");
+				System.out.print("|  Ingrese el nombre del libro: ");
 				Scanner nombre = new Scanner(System.in);
-				String nombreLibro = teclado.nextLine();
+				String nombreLibro = nombre.nextLine();
 				Libro libroBuscado = consul.buscarLibro(nombreLibro);
 				libroBuscado.mostrarDatos();
 				} else if (opcion == 2) {
