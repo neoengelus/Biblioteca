@@ -31,7 +31,8 @@ public class Consulta {
 			stm = usarConexion.createStatement();
 			rs = stm.executeQuery(consulta); 
 			ArrayList<Libro> listaLibro = new ArrayList<Libro>();
-			
+ 			ArrayList<Integer> listaAutor = new ArrayList<Integer>();
+ 			
 			while (rs.next()) {
 				Libro libro = new Libro();
 				libro.setIdLibro(rs.getInt(1));
@@ -39,26 +40,30 @@ public class Consulta {
 				libro.SetDescripcion(rs.getString(3));
 				libro.setLinkDescarga(rs.getString(4));
 				libro.setCantPaginas(rs.getInt(5));
-				//libro.setAutor(buscarAutor(rs.getInt(6)));
+				listaAutor.add(rs.getInt(6));
 				listaLibro.add(libro);
 		} 
 			if (tipoUsuario == 1 || tipoUsuario == 2) {
-			//System.out.println("ID | Nombre | Descripcion | Cantidad de Páginas | Autor | Link Descarga");
-			System.out.printf("|%-20s|%-20s|%-20s,|%-20s|%-20s|%-20s\n","ID", "Nombre", "Descripcion", "Cantidad de Paginas", "Autor", "Link Descarga \n");
+				System.out.printf("+---+-----------------------------------------+----------------------------------------------------------------------------------------+-----+------------------------------+------------------------------+\n");
+				System.out.printf("|%-3s|%-41s|%-88s|%5s|%30s|%30s|\n","ID", "Nombre", "Descripcion", "Pag.", "Autor", "Link");
+				System.out.printf("+---+-----------------------------------------+----------------------------------------------------------------------------------------+-----+------------------------------+------------------------------+\n");
 			for (int i=0; i < listaLibro.size(); i++) {
 				Libro libro = new Libro();
 				libro = listaLibro.get(i);
-				System.out.printf("|%-20s|%-20s|%-20s|%-20s|%-20s|\n", libro.getIdLibro(),libro.getTitulo(),libro.getDescripcion(),libro.getCantPaginas(),libro.getLinkDescarga());
+				System.out.printf("|%-3s|%-41s|%-88s|%5s|%30s|%30s\n", libro.getIdLibro(),libro.getTitulo(),libro.getDescripcion(),libro.getCantPaginas(),buscarAutor(listaAutor.get(i)),libro.getLinkDescarga());
 				}
+			System.out.printf("+---+-----------------------------------------+----------------------------------------------------------------------------------------+-----+------------------------------+-------------------------------+\n");
 			} 
 		else if (tipoUsuario == 3) {
-			System.out.printf("|%-20s|%-20s|%-20s|%-20s|%-20s\n", "ID", "Nombre", "Descripcion", "Cantidad de Paginas", "Autor \n");
+			System.out.printf("+---+-----------------------------------------+----------------------------------------------------------------------------------------+-----+------------------------------+\n");
+			System.out.printf("|%-3s|%-41s|%-88s|%5s|%30s|\n","ID", "Nombre", "Descripcion", "Pag.", "Autor");
+			System.out.printf("+---+-----------------------------------------+----------------------------------------------------------------------------------------+-----+------------------------------+\n");
 			for (int i=0; i < listaLibro.size(); i++) {
 				Libro libro = new Libro();
 				libro = listaLibro.get(i);
-				System.out.printf("|%-20s|%-20s|%-20s|%-20s\n", libro.getIdLibro(),libro.getTitulo(),libro.getDescripcion(),libro.getCantPaginas());
-				}
-			
+				System.out.printf("|%-3s|%-41s|%-88s|%5s|%30s|\n", libro.getIdLibro(),libro.getTitulo(),libro.getDescripcion(),libro.getCantPaginas(),buscarAutor(listaAutor.get(i)));
+				}	
+			System.out.printf("+---+-----------------------------------------+----------------------------------------------------------------------------------------+-----+------------------------------+\n");
 		} 
 		else if (tipoUsuario == 4) {
 			System.out.println("Usuario de baja o suspendido");
@@ -144,9 +149,16 @@ public class Consulta {
 			ps.setObject(6,user.getDni());
 			ps.setObject(7, user.getMail());
 			ps.executeUpdate();
-			System.out.println("Se agregó correctamente al usuario: "+user.getNombreUsuario());
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|            Se agregó correctamente el usuario                    |");
+			
 		}catch (Exception e) {
-			System.out.println("Ocurrio un error inesperado"+ " "+e);
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("         OCURRIO UN ERROR INESPERADO " + e);
+			System.out.println("+------------------------------------------------------------------+");
+			try { Thread.sleep(2500); 
+			  } catch(InterruptedException ex) 
+			  { Thread.currentThread().interrupt(); }
 		}
 	}
 
@@ -165,6 +177,46 @@ public class Consulta {
 			System.out.println("Ocurrio un error inesperado"+ " "+e);
 		}
 		return id;
+	}
+	
+	public int existeUsuario(String usuario) {
+		//devuelve 1 en caso de existir el usuario caso contrario devuelve 0
+		int resultado = 0;
+		usarConexion = conn.conectar();
+		String consulta = "SELECT * FROM usuario WHERE nombreUsuario = '"+usuario+"'";
+		
+		try {
+			stm = usarConexion.createStatement();
+			rs = stm.executeQuery(consulta);
+			if (rs.next()) {
+				resultado = 1;
+			}
+		} catch (Exception error) {
+			System.out.println("Error inesperado");
+			System.out.println(error); 
+		}
+		return resultado;
+	}
+	
+	public int determinarTUsuario(String usuario) {
+		int resultado = 0;
+		usarConexion = conn.conectar();
+		String consulta = "SELECT tipoUsuario AS tU FROM usuario WHERE nombreUsuario = '"+usuario+"'";
+		
+		try {
+			
+			stm = usarConexion.createStatement();
+			rs = stm.executeQuery(consulta);
+			if (rs.next()) {
+				
+				resultado = rs.getInt("tU");
+				
+			}
+		} catch (Exception error) {
+			System.out.println("Error inesperado");
+			System.out.println(error); 
+		}
+		return resultado;
 	}
 	
 	public void mostrarUsuarios(int tipoUsuario) {
@@ -195,13 +247,21 @@ public class Consulta {
 				user.setMail(rs.getString(8));
 				listaUsuario.add(user);
 			}
-			System.out.println("Los usuarios son:");
-			System.out.printf("|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s\n" ,"ID", "Nombre de Usuario", "Password", "Tipo de Usuario","Nombre","Apellido","DNI","email\n");
+			if (listaUsuario.size() > 0) {
+			System.out.printf("+---+-----------------------------------------+--------------------+-----+------------------------------+------------------------------+---------------+----------------------------+\n");
+			System.out.printf("|%-3s|%-41s|%-20s|%-5s|%-30s|%-30s|%-15s|%-28s|\n","ID", "Nombre de Usuario", "Password", "Tipo.", "Nombre", "Apellido", "DNI", "email");
+			System.out.printf("+---+-----------------------------------------+--------------------+-----+------------------------------+------------------------------+---------------+----------------------------+\n");
 			for (int i=0; i < listaUsuario.size(); i++) {
 				Usuario user = new Usuario();
 				user = listaUsuario.get(i);
-				System.out.printf("|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s\n" ,user.getIdUsuario(),user.getNombreUsuario(),user.getPassword(),user.getTipoUsuario(),user.getNombre(),user.getApellido(),user.getDni(),user.getMail(),"\n");
+				System.out.printf("|%-3s|%-41s|%-20s|%-5s|%-30s|%-30s|%-15s|%-28s|\n",user.getIdUsuario(),user.getNombreUsuario(),user.getPassword(),user.getTipoUsuario(),user.getNombre(),user.getApellido(),user.getDni(),user.getMail(),"\n");
 			}
+			System.out.printf("+---+-----------------------------------------+--------------------+-----+------------------------------+------------------------------+---------------+----------------------------+\n");
+			} else {
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|            No se encontraron resultados                          |");
+				System.out.println("+------------------------------------------------------------------+");
+				}
 		}catch (Exception e) {
 			System.out.println("Ocurrio un error inesperado"+ " "+e);
 		}
@@ -272,9 +332,15 @@ public class Consulta {
 			ps.setObject(7, user.getMail());
 			ps.setObject(8, id);
 			ps.executeUpdate();
-			System.out.println("Se actualizó correctamente al usuario: "+user.getNombreUsuario());
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("  Se actualizó correctamente el usuario "+user.getNombreUsuario());
 		}catch (Exception e) {
-			System.out.println("Ocurrio un error inesperado"+ " "+e);
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("         OCURRIO UN ERROR INESPERADO " + e);
+			System.out.println("+------------------------------------------------------------------+");
+			try { Thread.sleep(2500); 
+			  } catch(InterruptedException ex) 
+			  { Thread.currentThread().interrupt(); }
 		}
 	}
 	
@@ -462,22 +528,68 @@ public class Consulta {
 	public void historialCuotas(int idUsuario) {
 		//muestra el historial de las cuotas en base al idUsuario
 		try {
+			Usuario usuario = buscarUsuario(idUsuario);
 			String consulta="SELECT * FROM cuota WHERE id_Usuario=" +idUsuario;
 			usarConexion = conn.conectar();
 			stm = usarConexion.createStatement();
 			rs = stm.executeQuery(consulta);
-			
-			System.out.printf("|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s\n","ID Cuota", "Estado", "Monto", "Dia","Mes","Usuario","Nombre Usuario");
-			if (rs.next()) {
-				System.out.printf("|%-20s|%-20d|%-20d|%-20s|%-20s",rs.getString(1), rs.getInt(2),rs.getInt(3),rs.getInt(5),rs.getInt(6));
-				Usuario usuario = buscarUsuario(idUsuario);
-				System.out.printf("|%-20s|%-20s\n", usuario.getNombre() +" " + usuario.getApellido(), usuario.getNombreUsuario());
-			}else {
-				System.out.println("No se econtró historial");
+					
+			//System.out.printf("|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s\n","ID Cuota", "Estado", "Monto", "Dia","Mes","Usuario","Nombre Usuario");
+			System.out.printf("+---+--------------------+-----+-----+--------------------+--------------------+------------------------------+\n");
+			System.out.printf("|%-3s|%-20s|%-5s|%-5s|%-20s|%-20s|%-30s|\n","ID", "Estado", "Monto", "Dia", "Mes", "Usuario", "Nombre Usuario");
+			System.out.printf("+---+--------------------+-----+-----+--------------------+--------------------+------------------------------+\n");
+			while(rs.next()) {
+				System.out.printf("|%-3s|%-20s|%-5s|%-5s|%-20s|",rs.getString(1), rs.getInt(2),rs.getInt(3),rs.getInt(5),nombreMes(rs.getInt(6)));
+				System.out.printf("%-20s|%-30s|\n", usuario.getNombre() +" " + usuario.getApellido(), usuario.getNombreUsuario());
 			}
+			System.out.printf("+---+--------------------+-----+-----+--------------------+--------------------+------------------------------+\n");
 		}catch (Exception e) {
 			System.out.println("Ocurrio un error inesperado"+ " "+e);
 		}
+	}
+	
+	public String nombreMes(int nroMes) {
+		String nombre = new String();
+		
+		switch (nroMes) {
+			case 1:
+				nombre = "Enero";
+				break;
+			case 2:
+				nombre = "Febrero";
+				break;
+			case 3:
+				nombre = "Marzo";
+				break;
+			case 4:
+				nombre = "Abril";
+				break;
+			case 5:
+				nombre = "Mayo";
+				break;
+			case 6:
+				nombre = "Junio";
+				break;
+			case 7:
+				nombre = "Julio";
+				break;
+			case 8:
+				nombre = "Agosto";
+				break;
+			case 9:
+				nombre = "Septiembre";
+				break;
+			case 10:
+				nombre = "Octubre";
+				break;
+			case 11:
+				nombre = "Noviembre";
+				break;
+			case 12:
+				nombre = "Diciembre";
+				break;
+		}
+		return nombre;
 	}
 	
 	public boolean determinarEstadoCuota(int idUsuario) {

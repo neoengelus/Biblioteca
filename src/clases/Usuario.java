@@ -11,13 +11,14 @@ public class Usuario {
 	private int tipoUsuario; //1: Admin, 2:Socio, 3:Visitante, 4:Baja/Suspendido
 	private int idUsuario;
 	private int dni;
+	private int estado;
 	
 	//Constructores
 	public Usuario() {
 		
 	}
 	
-	public Usuario(String nom, String ape, String mail, String nick, String pass, int tipo, int id, int dni) {
+	public Usuario(String nom, String ape, String mail, String nick, String pass, int tipo, int id, int dni, int est) {
 		this.nombre = nom;
 		this.apellido = ape;
 		this.mail = mail;
@@ -26,9 +27,10 @@ public class Usuario {
 		this.tipoUsuario = tipo;
 		this.idUsuario = id;
 		this.dni = dni;
+		this.estado = est;
 	}
 	
-	public Usuario(String nom, String ape, String mail, String nick, String pass, int tipo, int dni) {
+	public Usuario(String nom, String ape, String mail, String nick, String pass, int tipo, int dni, int est) {
 		this.nombre = nom;
 		this.apellido = ape;
 		this.mail = mail;
@@ -36,6 +38,7 @@ public class Usuario {
 		this.password = pass;
 		this.tipoUsuario = tipo;
 		this.dni = dni;
+		this.estado = est;
 	}
 	
 	public Usuario(Usuario u) {
@@ -47,6 +50,7 @@ public class Usuario {
 		this.tipoUsuario = u.tipoUsuario;
 		this.idUsuario = u.idUsuario;
 		this.dni = u.dni;
+		this.estado = u.estado;
 	}
 	
 	//Metodos set y get
@@ -82,6 +86,10 @@ public class Usuario {
 		this.dni = d;
 	}
 	
+	public void setEstado(int e) {
+		this.estado = e;
+	}
+	
 	public String getNombre() {
 		return this.nombre;
 	}
@@ -114,40 +122,60 @@ public class Usuario {
 		return this.dni;
 	}
 	
+	public int getEstadp() {
+		return this.estado;
+	}
+	
 	//Metodos propios
 	
 	public void mostrarDatos() {
-		System.out.println("Los datos son: ");
-		System.out.println("Nombre y Apellido: " +this.nombre +" " +this.apellido);
-		System.out.println("DNI: "+this.dni);
-		System.out.println("email: "+this.mail);
-		System.out.println("Nombre de Usuario: " +this.nombreUsuario);
-		System.out.println("Usuario de tipo: " +determinarTipoUsuario(this.tipoUsuario));
+		System.out.println("+------------------------------------------------------------------+");
+		System.out.println("|                     DATOS DEL USUARIO                            |");
+		System.out.println("+------------------------------------------------------------------+");
+		System.out.println("|                                                                  |");
+		System.out.println("|                                                                  |");
+		System.out.println("|   Nombre de Usuario: " +this.nombreUsuario);
+		System.out.println("|   Nombre y Apellido: " +this.nombre +" " +this.apellido);
+		System.out.println("|   DNI: "+this.dni);
+		System.out.println("|   email: "+this.mail);
+		System.out.println("|   Usuario de tipo: " +determinarTipoUsuario(this.tipoUsuario));
+		System.out.println("|   Estado: "+this.estado);
+		System.out.println("+------------------------------------------------------------------+");
+		
+		
 	}
 
 	public String determinarTipoUsuario(int t) {
-		if (t == 1) return "Administrador";
-		else if (t == 2) return "Usuario Registrado";
-		else if (t == 4) return "Usuario de Baja / Suspendido";
-		else return "Invitado";
+		switch (t){
+			case 1: return "Administrador";
+			case 2: return "Usuario registrado";
+			case 3: return "Usuario de baja / suspendido";
+			default : return "Invitado";
+		}
 	}
 
-	public void cargarUsuario() {
+	public void cargarUsuario(int tipo) {
 		try (Scanner teclado = new Scanner(System.in)) {
-			System.out.println("Ingrese Nombre");
-			this.nombre = teclado.nextLine();
-			System.out.println("Ingrese Apellido");
-			this.apellido = teclado.nextLine();
-			System.out.println("Ingrese correo electrónico (e-mail)");
-			this.mail = teclado.nextLine();
-			System.out.println("Ingrese el nombre de usuario a mostrar (nickname)");
+			
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|                         NUEVO USUARIO                            |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|                                                                  |");
+			System.out.println("|                                                                  |");
+			System.out.printf("   Ingrese nombre de Usuario: ");
 			this.nombreUsuario = teclado.nextLine();
-			System.out.println("Ingrese una contraseña (recuerde que es su responsabilidad el cuidado de la misma)");
+			System.out.printf("   Ingrese contraseña: ");
 			this.password = teclado.nextLine();
-			System.out.println("Ingrese DNI");
+			System.out.printf("   Ingrese su Nombre: ");
+			this.nombre = teclado.nextLine();
+			System.out.printf("   Ingrese su Apellido: ");
+			this.apellido = teclado.nextLine();
+			System.out.printf("   Ingrese su DNI: ");
 			this.dni = teclado.nextInt();
-			System.out.println("Ingrese el tipo de Usuario: \n 1) Administrador \n 2) Socio \n 4) De baja / suspendido");
-			this.tipoUsuario = teclado.nextInt();
+			System.out.printf("   Ingrese su  dirección de correo electronico: ");
+			this.mail = teclado.next();
+			this.tipoUsuario = tipo;
+			this.estado = 1;
 		}
 	}
 }
