@@ -3,13 +3,16 @@ import java.sql.*;
 import java.util.Scanner;
 
 public class Main {
-	
+
 	static String nombre;
 	static String password;
 	
 	public static void main(String[] args) {
+		// TODO Auto-generated method stub
 		opciones(Menu());
-		}
+		
+		
+	}
 
 	//Funciones 
 	public static int Menu() {
@@ -44,10 +47,8 @@ public class Main {
 			System.out.println("|                                                                  |");
 			System.out.printf("     USUARIO: ");
 			user = teclado.nextLine();
-			nombre = user;
 			System.out.printf("     CONTRASEÑA: ");
 			pass = teclado.next();
-			password = pass;
 			Login logueo = new Login();
 			if (logueo.login(user, pass) == 1) {
 				System.out.println("+------------------------------------------------------------------+");
@@ -81,51 +82,15 @@ public class Main {
 			break;
 			
 		case 2: 
-			
-			 try {
-					Conexion conn = new Conexion();
-					Connection con = null;
-					Statement stm = null;
-
-					con = conn.conectar();
-					stm = con.createStatement();
-					String sql;
-					sql = "SELECT L.id_Libro AS ID, L.titulo AS Titulo, L.descripcion AS Descripcion, L.paginas AS Paginas, A.nombre AS Autor  FROM libro as L INNER JOIN autor as A ON L.id_Autor = A.id_Autor;";
-					ResultSet rs = stm.executeQuery(sql);
-						  
-					System.out.printf("+---+-----------------------------------------+----------------------------------------------------------------------------------------+-----+------------------------------+\n");
-					System.out.printf("|%-3s|%-41s|%-88s|%5s|%30s|\n","ID", "Nombre", "Descripcion", "Pag.", "Autor");
-					System.out.printf("+---+-----------------------------------------+----------------------------------------------------------------------------------------+-----+------------------------------+\n");
-					  
-					while (rs.next()) {
-							int id = rs.getInt("ID");
-							String titulo = rs.getString("Titulo");
-							String desc = rs.getString("Descripcion");
-							int pag = rs.getInt("Paginas");
-							String autor = rs.getString ("Autor");
-							System.out.printf("|%-3s|%-41s|%-88s|%5s|%30s|\n", id, titulo, desc, pag, autor);
-					
-							}
-					System.out.printf("+---+-----------------------------------------+----------------------------------------------------------------------------------------+-----+------------------------------+\n");
-					  
-					} catch (Exception e) {
-						System.out.println("error!!");
-						System.out.println(e);
-					}
-				
+			Consulta consul = new Consulta();
+			consul.mostrarLibros(3);
 			System.out.printf("Presione una tecla + 'Enter' para volver al menu anterior");
 			teclado.next();
 			opciones(Menu());
-			
+		
 			break;
 		
 		case 3: 
-			
-			//Usuario newUser = new Usuario();
-			//newUser.cargarUsuario(2);
-			//String nick = newUser.getNombreUsuario();
-			//System.out.println(nick);
-			
 			System.out.println("+------------------------------------------------------------------+");
 			System.out.println("|                         NUEVO USUARIO                            |");
 			System.out.println("+------------------------------------------------------------------+");
@@ -199,7 +164,7 @@ public class Main {
 			break;
 		
 		}
-		//teclado.close();
+		
 		
 	}
 	
@@ -215,7 +180,7 @@ public class Main {
 			System.out.println("|                                                                  |");
 			System.out.println("| (1) Crear, Ver, Actualizar o Borrar un usuario administrador     |");
 			System.out.println("| (2) Acciones con cuotas de Socios                                |");
-			System.out.println("| (3) Ver registro de multas de un Socio                           |");
+			System.out.println("| (3) Ver, Actualizar o Dar de Baja un Socio                       |");
 			System.out.println("| (4) Ver libros descargados por un Socio                          |");
 			System.out.println("| (5) Crear, Actualizar o Borrar un Libro                          |");
 			System.out.println("| (6) Buscar un libro                                              |");
@@ -224,7 +189,7 @@ public class Main {
 			System.out.println("+------------------------------------------------------------------+");
 			System.out.printf("| Ingrese su opción: ");
 			opcion = teclado.nextInt();
-			if (opcion == 8) {
+			if (opcion == 7) {
 				try { Thread.sleep(1000); 
 				  } catch(InterruptedException ex) 
 				  { Thread.currentThread().interrupt(); }
@@ -276,8 +241,9 @@ public class Main {
 	
 	public static void accionesAdmin(int op) {
 		Scanner teclado = new Scanner(System.in);
+		Consulta cons = new Consulta();
+		Usuario user = new Usuario();
 		int opcion;
-		String respuesta;
 		
 		switch(op) {
 		case 1:
@@ -304,43 +270,105 @@ public class Main {
 			System.out.println("|                                                                  |");
 			System.out.println("| (1) Ver cuotas impagas                                           |");
 			System.out.println("| (2) Registrar cuota pagada                                       |");
-			System.out.println("| (3) Actualizar datos de un Administrador                         |");
-			System.out.println("| (4) Borrar un usuario Administrador                              |");
-			System.out.println("| (5) Salir                                                        |");
+			System.out.println("| (3) Salir                                                        |");
 			System.out.println("|                                                                  |");
 			System.out.println("+------------------------------------------------------------------+");
 			System.out.printf("| Ingrese su opción: ");
 			opcion = teclado.nextInt();
+			if (opcion == 1) {
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|                  Administradores - Biblioteca 2.0                |");
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|                                                                  |");
+				System.out.printf("|  Ingrese el nombre de USUARIO a buscar: ");
+				user = cons.buscarUsuario(teclado.next());
+				if (user == null) {
+					System.out.println("+------------------------------------------------------------------+");
+					System.out.println("|    NOMBRE DE USUARIO ERRÓNEO O INEXISTENTE                       |");
+					System.out.println("|    Regresando al menu anterior...                                |");
+					System.out.println("+------------------------------------------------------------------+");
+					try { Thread.sleep(2500); 
+					  } catch(InterruptedException ex) 
+					  { Thread.currentThread().interrupt(); }
+					menuUsuario(1);
+				} else {
+					cons.moraCuotas(user.getIdUsuario());
+					System.out.println("+------------------------------------------------------------------+");
+				}
+				
+			}else if (opcion == 2) {
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|                  Administradores - Biblioteca 2.0                |");
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|                                                                  |");
+				System.out.printf("|  Ingrese el nombre de USUARIO a buscar: ");
+				user = cons.buscarUsuario(teclado.next());
+				if (user == null) {
+					System.out.println("+------------------------------------------------------------------+");
+					System.out.println("|    NOMBRE DE USUARIO ERRÓNEO O INEXISTENTE                       |");
+					System.out.println("|    Regresando al menu anterior...                                |");
+					System.out.println("+------------------------------------------------------------------+");
+					try { Thread.sleep(2500); 
+					  } catch(InterruptedException ex) 
+					  { Thread.currentThread().interrupt(); }
+					menuUsuario(1);
+				} else {System.out.println("|                                                                  |");
+						System.out.printf("|  Ingrese el MONTO de la cuota: ");
+						int cuota = teclado.nextInt();
+						cons.registrarCuota(user.getIdUsuario(), cuota);
+						System.out.println("+------------------------------------------------------------------+");
+						System.out.println("|          REGRESANDO AL MENU ANTERIOR...                          |");
+						System.out.println("+------------------------------------------------------------------+");
+						try { Thread.sleep(1000); 
+						  } catch(InterruptedException ex) 
+						  { Thread.currentThread().interrupt(); }
+						menuUsuario(1);
+					}
+			}else menuUsuario(1);
 			
 			
 			break;
 		case 3:
-			
-			break;
-		case 4:
 			System.out.println("+------------------------------------------------------------------+");
 			System.out.println("|                  Administradores - Biblioteca 2.0                |");
 			System.out.println("+------------------------------------------------------------------+");
 			System.out.println("|                                                                  |");
-			System.out.print("| Ingrese el nombre del usuario: ");
-			respuesta = teclado.nextLine();
-			Consulta consul = new Consulta();
-			if (consul.existeUsuario(respuesta) == 0) {
-				System.out.println("+------------------------------------------------------------------+");
-				System.out.println("|                  El usuario ingresado no existe                  |");
-				System.out.println("+------------------------------------------------------------------+");
-				accionesAdmin(4);
-			} else {
-				int idUsuario = consul.buscarIdUsuario(respuesta);
-				consul.historialDescargas(idUsuario);
-			}
-				
+			System.out.println("| (1) Ver datos de un Socio                                        |");
+			System.out.println("| (2) Actualizar datos de un Socio                                 |");
+			System.out.println("| (3) Dar de baja un Socio										   |");
+			System.out.println("| (4) Salir                                                        |");
+			System.out.println("|                                                                  |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.printf("| Ingrese su opción: ");
+			opcion = teclado.nextInt();
+			crudUsuarios(opcion, 2);
+			break;
+		case 4:
+			
 			break;
 		case 5:
-			
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|                  Administradores - Biblioteca 2.0                |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|                                                                  |");
+			System.out.println("| (1) Crear un libro nuevo                                         |");
+			System.out.println("| (2) Actualizar datos de un Libro                                 |");
+			System.out.println("| (3) Borrar un libro   										   |");
+			System.out.println("| (4) Salir                                                        |");
+			System.out.println("|                                                                  |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.printf("| Ingrese su opción: ");
+			opcion = teclado.nextInt();
+			if (opcion == 4)
+				menuUsuario(1);
+			else
+				crudLibros(opcion);
 			break;
 		case 6:
-			
+			crudLibros(4);
+			break;
+		case 7:
+			menuUsuario(1);
 			break;
 		default:
 			System.out.println("+------------------------------------------------------------------+");
@@ -350,7 +378,7 @@ public class Main {
 			  } catch(InterruptedException ex) 
 			  { Thread.currentThread().interrupt(); }
 			menuUsuario(1);
-			break;
+			
 		
 		}
 		
@@ -467,7 +495,6 @@ public class Main {
 			break;
 		}
 	}
-
 	public static void crudUsuarios(int op, int tipo) {
 		Scanner teclado = new Scanner(System.in);
 		Usuario user = new Usuario();
@@ -560,7 +587,36 @@ public class Main {
 				
 				break;
 			case 4:
-				
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|                  Administradores - Biblioteca 2.0                |");
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|                                                                  |");
+				System.out.printf("|  Ingrese el nombre de USUARIO a ELIMINAR: ");
+				user = consul.buscarUsuario(teclado.next());
+				if (user == null || user.getTipoUsuario() != 1) {
+					System.out.println("+------------------------------------------------------------------+");
+					System.out.println("|    NOMBRE DE USUARIO ADMINISTRADOR ERRÓNEO O INEXISTENTE         |");
+					System.out.println("|    Regresando al menu anterior...                                |");
+					System.out.println("+------------------------------------------------------------------+");
+					try { Thread.sleep(2500); 
+					  } catch(InterruptedException ex) 
+					  { Thread.currentThread().interrupt(); }
+					accionesAdmin(1);
+				} else {
+					System.out.println("+------------------------------------------------------------------+");
+					System.out.println("|  Se ELIMINARA el usuario (1) Confirmar  (2) Cancelar             |");
+					System.out.println("|  Ingrese su opción: ");
+					int conf = teclado.nextInt();
+					if (conf == 1)
+						consul.borrarUsuario(user.getIdUsuario());
+					System.out.println("+------------------------------------------------------------------+");
+					System.out.println("|          REGRESANDO AL MENU ANTERIOR...                          |");
+					System.out.println("+------------------------------------------------------------------+");
+					try { Thread.sleep(1500); 
+					  } catch(InterruptedException ex) 
+					  { Thread.currentThread().interrupt(); }
+					accionesAdmin(1);
+				}
 				break;
 			default:
 				System.out.println("+------------------------------------------------------------------+");
@@ -570,10 +626,204 @@ public class Main {
 				  } catch(InterruptedException ex) 
 				  { Thread.currentThread().interrupt(); }
 				menuUsuario(1);
-				break;
+				
 			}
-		}else {	
-		
+		}else { if (tipo == 2) {
+			switch(op) {
+			case 1:
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|                  Administradores - Biblioteca 2.0                |");
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|                                                                  |");
+				System.out.printf("|  Ingrese el nombre de USUARIO a buscar: ");
+				user = consul.buscarUsuario(teclado.next());
+				if (user == null) {
+					System.out.println("+------------------------------------------------------------------+");
+					System.out.println("|    NOMBRE DE SOCIO ERRÓNEO O INEXISTENTE 					       |");
+					System.out.println("|    Regresando al menu anterior...                                |");
+					System.out.println("+------------------------------------------------------------------+");
+					try { Thread.sleep(2500); 
+					  } catch(InterruptedException ex) 
+					  { Thread.currentThread().interrupt(); }
+					accionesAdmin(3);
+				} else {
+					user.mostrarDatos();
+					System.out.println("|  TOME NOTA Y PRESIONE UNA TECLA + 'ENTER' PARA CONTINUAR         |");
+					System.out.println("+------------------------------------------------------------------+");
+					String a = teclado.next();
+					accionesAdmin(3);
+				}
+				break;
+			case 2:
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|                  Administradores - Biblioteca 2.0                |");
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|                                                                  |");
+				System.out.printf("|  Ingrese el nombre del SOCIO a MODIFICAR: ");
+				user = consul.buscarUsuario(teclado.next());
+				if (user == null || user.getTipoUsuario() !=2) {
+					System.out.println("+------------------------------------------------------------------+");
+					System.out.println("|    NOMBRE DE SOCIO ERRÓNEO O INEXISTENTE				           |");
+					System.out.println("|    Regresando al menu anterior...                                |");
+					System.out.println("+------------------------------------------------------------------+");
+					try { Thread.sleep(2000); 
+					  } catch(InterruptedException ex) 
+					  { Thread.currentThread().interrupt(); }
+					accionesAdmin(3);
+				} else {
+					user.cargarUsuario(user.getTipoUsuario());
+					consul.actualizarUsuario(user, user.getIdUsuario());
+					System.out.println("+------------------------------------------------------------------+");
+					System.out.println("|          REGRESANDO AL MENU ANTERIOR...                          |");
+					System.out.println("+------------------------------------------------------------------+");
+					try { Thread.sleep(1500); 
+					  } catch(InterruptedException ex) 
+					  { Thread.currentThread().interrupt(); }
+					accionesAdmin(3);
+				}
+				break;
+			case 3:
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|                  Administradores - Biblioteca 2.0                |");
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|                                                                  |");
+				System.out.printf("|  Ingrese el nombre del SOCIO a DAR DE BAJA: ");
+				user = consul.buscarUsuario(teclado.next());
+				if (user == null || user.getTipoUsuario() != 2) {
+					System.out.println("+------------------------------------------------------------------+");
+					System.out.println("|    NOMBRE DE SOCIO ERRÓNEO, INEXISTENTE O DE BAJA                |");
+					System.out.println("|    Regresando al menu anterior...                                |");
+					System.out.println("+------------------------------------------------------------------+");
+					try { Thread.sleep(2500); 
+					  } catch(InterruptedException ex) 
+					  { Thread.currentThread().interrupt(); }
+					accionesAdmin(3);
+				} else {
+					consul.bajaUsuario(user.getIdUsuario());
+					System.out.println("+------------------------------------------------------------------+");
+					System.out.println("|          REGRESANDO AL MENU ANTERIOR...                          |");
+					System.out.println("+------------------------------------------------------------------+");
+					try { Thread.sleep(1500); 
+					  } catch(InterruptedException ex) 
+					  { Thread.currentThread().interrupt(); }
+					accionesAdmin(3);
+				}
+				break;
+			case 4:
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|          REGRESANDO AL MENU ANTERIOR...                          |");
+				System.out.println("+------------------------------------------------------------------+");
+				try { Thread.sleep(1500); 
+				  } catch(InterruptedException ex) 
+				  { Thread.currentThread().interrupt(); }
+				menuUsuario(1);
+				break;
+			default:
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|          OPCION NO DISPONIBLE, INTENTE NUEVAMENTE                |");
+				System.out.println("+------------------------------------------------------------------+");
+				try { Thread.sleep(1500); 
+				  } catch(InterruptedException ex) 
+				  { Thread.currentThread().interrupt(); }
+				menuUsuario(1);
+			}
 		}
+			
+		}
+		
+		
+	}
+	
+	public static void crudLibros(int op) {
+		Scanner teclado = new Scanner(System.in);
+		Libro book = new Libro();
+		Consulta cons = new Consulta();
+		
+		switch(op) {
+		case 1:
+			book = book.crearLibro();
+			if (cons.buscarLibro(book.getTitulo()) == null) {
+				int id = cons.buscarIdAutor(book.getAutor());
+				cons.crearLibro(book, id);
+				
+			}else {
+				
+			}
+			accionesAdmin(5);
+			break;
+		case 2:
+			
+			break;
+		case 3:
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|                  Administradores - Biblioteca 2.0                |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|                                                                  |");
+			System.out.printf("|  Ingrese el nombre del LIBRO a ELIMINAR: ");
+			book = cons.buscarLibro(teclado.next());
+			if (book == null) {
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|    NOMBRE DE LIBRO ERRÓNEO O INEXISTENTE         |");
+				System.out.println("|    Regresando al menu anterior...                                |");
+				System.out.println("+------------------------------------------------------------------+");
+				try { Thread.sleep(2500); 
+				  } catch(InterruptedException ex) 
+				  { Thread.currentThread().interrupt(); }
+				menuUsuario(1);
+			}else {
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|  Se ELIMINARA el Libro (1) Confirmar  (2) Cancelar             |");
+				System.out.println("|  Ingrese su opción: ");
+				int conf = teclado.nextInt();
+				if (conf == 1)
+					cons.eliminarLibro(book.getIdLibro());
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|          REGRESANDO AL MENU ANTERIOR...                          |");
+				System.out.println("+------------------------------------------------------------------+");
+				try { Thread.sleep(1500); 
+				  } catch(InterruptedException ex) 
+				  { Thread.currentThread().interrupt(); }
+				menuUsuario(1);
+			}
+			
+			break;
+		case 4:
+			
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|                  Administradores - Biblioteca 2.0                |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|                                                                  |");
+			System.out.printf("|  Ingrese el nombre del LIBRO a BUSCAR: ");
+			book = cons.buscarLibro(teclado.next());
+			if (book == null) {
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|    NOMBRE DE LIBRO ERRÓNEO O INEXISTENTE         |");
+				System.out.println("|    Regresando al menu anterior...                                |");
+				System.out.println("+------------------------------------------------------------------+");
+				try { Thread.sleep(2500); 
+				  } catch(InterruptedException ex) 
+				  { Thread.currentThread().interrupt(); }
+				menuUsuario(1);
+			} else {
+				book.mostrarDatos(book);
+				System.out.println("|  TOME NOTA Y PRESIONE UNA TECLA + 'ENTER' PARA CONTINUAR         |");
+				System.out.println("+------------------------------------------------------------------+");
+				String a = teclado.next();
+				try { Thread.sleep(1500); 
+				  } catch(InterruptedException ex) 
+				  { Thread.currentThread().interrupt(); }
+				menuUsuario(1);
+			}
+			break;
+		default:
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|          OPCION NO DISPONIBLE, INTENTE NUEVAMENTE                |");
+			System.out.println("+------------------------------------------------------------------+");
+			try { Thread.sleep(1500); 
+			  } catch(InterruptedException ex) 
+			  { Thread.currentThread().interrupt(); }
+			menuUsuario(1);
+		}
+		
 	}
 }
