@@ -117,6 +117,22 @@ public class Consulta {
 		return nuevoLibro;
 	}
 	
+	public String buscarTituloLibro(int id) {
+		String titulo="";
+		try {
+			usarConexion = conn.conectar(); 
+			String consulta = "SELECT titulo FROM libro WHERE id_libro='"+id+"'";
+			stm = usarConexion.createStatement();
+			rs = stm.executeQuery(consulta); 
+			if (rs.next()) {
+				titulo = rs.getString(1);
+			}
+		} catch (Exception e) {
+			System.out.println("Ocurrio un error inesperado" + " " + e);
+		} 
+		return titulo;
+	}
+	
 	public String buscarAutor(int idAutor) {
 		//devuelve el nombre del autor en caso de no encontrarlo devuelve null
 		String autor = new String();
@@ -505,25 +521,27 @@ public class Consulta {
 		//muestra el historial de descargas en base al idUsuario
 		try {
 			String consulta ="SELECT * FROM descarga WHERE id_Usuario=" +idUsuario;
-			usarConexion = conn.conectar();
+			Usuario user = buscarUsuario(idUsuario);
+			
+			System.out.printf("+--------------------+--------------------+--------------------+--------------------------------------------------+\n");
+			System.out.printf("|%-20s|%-20s|%-20s|%-50s|\n","ID Descarga", "Fecha", "Usuario", "Libro");
+			System.out.printf("+--------------------+--------------------+--------------------+--------------------------------------------------+\n");
+			ArrayList<Integer> listaIdLibro = new ArrayList<Integer>();
+			ArrayList<Integer> listaDescarga = new ArrayList<Integer>();
+			ArrayList<String> listaFecha = new ArrayList<String>();
+ 			usarConexion = conn.conectar();
 			stm = usarConexion.createStatement();
 			rs = stm.executeQuery(consulta);
-			
-			//System.out.printf("|%-20s|%-20s|%-20s|%-20s\n","ID Descarga", "Fecha", "Usuario", "Libro");
-			System.out.printf("+--------------------+--------------------+--------------------+-------------------------+\n");
-			System.out.printf("|%-20s|%-20s|%-20s|%-25s|\n","ID Descarga", "Fecha", "Usuario", "Libro");
-			System.out.printf("+--------------------+--------------------+--------------------+-------------------------+\n");
-			if (rs.next()) {
-				System.out.printf("|%-20s|%-20s",rs.getString(1), rs.getString(2));
-				int id=rs.getInt(4);
-				Usuario usuario = buscarUsuario(idUsuario);
-				Libro libro = buscarLibro(id);
-				System.out.printf("|%-20s|%-25s|\n",usuario.getNombreUsuario(), libro.getTitulo());
+			while (rs.next()) {
+				listaDescarga.add(rs.getInt(1));
+				listaFecha.add(rs.getString(2));
+				listaIdLibro.add(rs.getInt(4));
+				}
+			for (int i=0;i<listaIdLibro.size();i++) {
+				String titulo = buscarTituloLibro(i);
+				System.out.printf("|%-20s|%-20s|%-20s|%-50s|\n",listaDescarga.get(i), listaFecha.get(i), user.getNombreUsuario(), titulo);
 			}
-			else {
-				System.out.println("No se econtró historial");
-			}
-			System.out.printf("+--------------------+--------------------+--------------------+-------------------------+\n");
+			System.out.printf("+--------------------+--------------------+--------------------+--------------------------------------------------+\n");
 		}catch (Exception e) {
 			System.out.println("Ocurrio un error inesperado"+ " "+e);
 		}
@@ -538,7 +556,6 @@ public class Consulta {
 			stm = usarConexion.createStatement();
 			rs = stm.executeQuery(consulta);
 					
-			//System.out.printf("|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s|%-20s\n","ID Cuota", "Estado", "Monto", "Dia","Mes","Usuario","Nombre Usuario");
 			System.out.printf("+---+--------------------+-----+-----+--------------------+--------------------+------------------------------+\n");
 			System.out.printf("|%-3s|%-20s|%-5s|%-5s|%-20s|%-20s|%-30s|\n","ID", "Estado", "Monto", "Dia", "Mes", "Usuario", "Nombre Usuario");
 			System.out.printf("+---+--------------------+-----+-----+--------------------+--------------------+------------------------------+\n");

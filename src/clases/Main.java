@@ -216,11 +216,10 @@ public class Main {
 			System.out.println("| (1) Crear, Ver, Actualizar o Borrar un usuario administrador     |");
 			System.out.println("| (2) Acciones con cuotas de Socios                                |");
 			System.out.println("| (3) Ver registro de multas de un Socio                           |");
-			System.out.println("| (4) Ver, Actualizar o Dar de Baja un Socio                       |");
-			System.out.println("| (5) Ver libros descargados por un Socio                          |");
-			System.out.println("| (6) Crear, Actualizar o Borrar un Libro                          |");
-			System.out.println("| (7) Buscar un libro                                              |");
-			System.out.println("| (8) Salir                                                        |");
+			System.out.println("| (4) Ver libros descargados por un Socio                          |");
+			System.out.println("| (5) Crear, Actualizar o Borrar un Libro                          |");
+			System.out.println("| (6) Buscar un libro                                              |");
+			System.out.println("| (7) Salir                                                        |");
 			System.out.println("|                                                                  |");
 			System.out.println("+------------------------------------------------------------------+");
 			System.out.printf("| Ingrese su opción: ");
@@ -278,6 +277,7 @@ public class Main {
 	public static void accionesAdmin(int op) {
 		Scanner teclado = new Scanner(System.in);
 		int opcion;
+		String respuesta;
 		
 		switch(op) {
 		case 1:
@@ -318,15 +318,28 @@ public class Main {
 			
 			break;
 		case 4:
-			
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|                  Administradores - Biblioteca 2.0                |");
+			System.out.println("+------------------------------------------------------------------+");
+			System.out.println("|                                                                  |");
+			System.out.print("| Ingrese el nombre del usuario: ");
+			respuesta = teclado.nextLine();
+			Consulta consul = new Consulta();
+			if (consul.existeUsuario(respuesta) == 0) {
+				System.out.println("+------------------------------------------------------------------+");
+				System.out.println("|                  El usuario ingresado no existe                  |");
+				System.out.println("+------------------------------------------------------------------+");
+				accionesAdmin(4);
+			} else {
+				int idUsuario = consul.buscarIdUsuario(respuesta);
+				consul.historialDescargas(idUsuario);
+			}
+				
 			break;
 		case 5:
 			
 			break;
 		case 6:
-			
-			break;
-		case 7:
 			
 			break;
 		default:
